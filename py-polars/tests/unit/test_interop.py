@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from datetime import date, datetime, time
 from typing import Any, cast
 
@@ -121,13 +120,21 @@ def test_from_pandas() -> None:
     for col, dtype in overrides.items():
         assert out.schema[col] == dtype
 
-    # empty and/or all null values, no pandas dtype
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", Warning)
 
-        for nulls in ([], [None], [None, None], [None, None, None]):
-            srs = pl.from_pandas(pd.Series(nulls))
-            assert nulls == srs.to_list()
+@pytest.mark.parametrize(
+    "nulls",
+    [
+        [],
+        [None],
+        [None, None],
+        [None, None, None],
+    ],
+)
+def test_from_pandas_nulls(nulls: list[None]) -> None:
+    # empty and/or all null values, no pandas dtype
+    ps = pd.Series(nulls)
+    s = pl.from_pandas(ps)
+    assert nulls == s.to_list()
 
 
 def test_from_pandas_nan_to_null() -> None:
@@ -566,15 +573,18 @@ def test_to_pandas() -> None:
             pl.col("f").cast(pl.Categorical).alias("i"),
         ]
     )
+
     pd_out = df.to_pandas()
+    ns_datetimes = pa.__version__ < "13"
+
     pd_out_dtypes_expected = [
         np.dtype(np.uint8),
         np.dtype(np.float64),
         np.dtype(np.float64),
-        np.dtype("datetime64[ms]"),
+        np.dtype(f"datetime64[{'ns' if ns_datetimes else 'ms'}]"),
         np.dtype(np.object_),
         np.dtype(np.object_),
-        np.dtype("datetime64[us]"),
+        np.dtype(f"datetime64[{'ns' if ns_datetimes else 'us'}]"),
         pd.CategoricalDtype(categories=["a", "b", "c"], ordered=False),
         pd.CategoricalDtype(categories=["e", "f"], ordered=False),
     ]
@@ -1008,10 +1018,10 @@ def test_series_from_repr() -> None:
         )
 
         for col in frame.columns:
-            srs = cast(pl.Series, pl.from_repr(repr(frame[col])))
-            assert_series_equal(srs, frame[col])
+            s = cast(pl.Series, pl.from_repr(repr(frame[col])))
+            assert_series_equal(s, frame[col])
 
-    srs = cast(
+    s = cast(
         pl.Series,
         pl.from_repr(
             """
@@ -1026,9 +1036,9 @@ def test_series_from_repr() -> None:
             """
         ),
     )
-    assert_series_equal(srs, pl.Series("s", ["a", "c"]))
+    assert_series_equal(s, pl.Series("s", ["a", "c"]))
 
-    srs = cast(
+    s = cast(
         pl.Series,
         pl.from_repr(
             """
@@ -1038,7 +1048,7 @@ def test_series_from_repr() -> None:
             """
         ),
     )
-    assert_series_equal(srs, pl.Series("flt", [], dtype=pl.Float32))
+    assert_series_equal(s, pl.Series("flt", [], dtype=pl.Float32))
 
 
 def test_to_init_repr() -> None:

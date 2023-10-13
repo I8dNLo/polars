@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "python")]
 use crate::prelude::python_udf::PythonFunction;
-use crate::prelude::Expr;
 
 pub type FileCount = u32;
 
@@ -25,7 +24,7 @@ pub type FileCount = u32;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct CsvParserOptions {
-    pub delimiter: u8,
+    pub separator: u8,
     pub comment_char: Option<u8>,
     pub quote_char: Option<u8>,
     pub eol_char: u8,
@@ -101,6 +100,7 @@ pub struct FileScanOptions {
     pub row_count: Option<RowCount>,
     pub rechunk: bool,
     pub file_counter: FileCount,
+    pub hive_partitioning: bool,
 }
 
 #[derive(Clone, Debug, Copy, Default, Eq, PartialEq)]
@@ -147,7 +147,7 @@ pub struct DistinctOptions {
 pub enum ApplyOptions {
     /// Collect groups to a list and apply the function over the groups.
     /// This can be important in aggregation context.
-    // e.g. [g1, g1, g2] -> [[g1, g2], g2]
+    // e.g. [g1, g1, g2] -> [[g1, g1], g2]
     ApplyGroups,
     // collect groups to a list and then apply
     // e.g. [g1, g1, g2] -> list([g1, g1, g2])
@@ -292,12 +292,7 @@ pub struct PythonOptions {
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AnonymousScanOptions {
-    pub schema: SchemaRef,
-    pub output_schema: Option<SchemaRef>,
     pub skip_rows: Option<usize>,
-    pub n_rows: Option<usize>,
-    pub with_columns: Option<Arc<Vec<String>>>,
-    pub predicate: Option<Expr>,
     pub fmt_str: &'static str,
 }
 
@@ -313,7 +308,7 @@ pub enum SinkType {
     Cloud {
         uri: Arc<String>,
         file_type: FileType,
-        cloud_options: Option<polars_core::cloud::CloudOptions>,
+        cloud_options: Option<polars_io::cloud::CloudOptions>,
     },
 }
 

@@ -21,13 +21,13 @@ if TYPE_CHECKING:
     from typing import Literal
 
     from polars import Expr, Series
-    from polars.type_aliases import ClosedInterval, IntoExpr, TimeUnit
+    from polars.type_aliases import ClosedInterval, IntoExprColumn, TimeUnit
 
 
 @overload
 def date_range(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -41,8 +41,8 @@ def date_range(
 
 @overload
 def date_range(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -56,8 +56,8 @@ def date_range(
 
 @overload
 def date_range(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -72,8 +72,8 @@ def date_range(
 @deprecate_renamed_parameter("low", "start", version="0.18.0")
 @deprecate_renamed_parameter("high", "end", version="0.18.0")
 def date_range(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = "1d",
     *,
     closed: ClosedInterval = "both",
@@ -126,7 +126,6 @@ def date_range(
        type date. All other permutations return a datetime Series.
 
        .. deprecated:: 0.19.3
-
            In a future version of Polars, `date_range` will always return a `Date`.
            Please use :func:`datetime_range` if you want a `Datetime` instead.
 
@@ -231,8 +230,8 @@ def date_range(
 
 @overload
 def date_ranges(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -245,8 +244,8 @@ def date_ranges(
 
 @overload
 def date_ranges(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -259,8 +258,8 @@ def date_ranges(
 
 @overload
 def date_ranges(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = ...,
     *,
     closed: ClosedInterval = ...,
@@ -272,8 +271,8 @@ def date_ranges(
 
 
 def date_ranges(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str | timedelta = "1d",
     *,
     closed: ClosedInterval = "both",
@@ -380,8 +379,8 @@ def date_ranges(
 
 
 def _warn_for_deprecated_date_range_use(
-    start: date | datetime | IntoExpr,
-    end: date | datetime | IntoExpr,
+    start: date | datetime | IntoExprColumn,
+    end: date | datetime | IntoExprColumn,
     interval: str,
     time_unit: TimeUnit | None,
     time_zone: str | None,
